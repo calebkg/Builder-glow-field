@@ -1,0 +1,255 @@
+<div class="expense-list-container" *ngIf="expenses$ | async as expenses">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon class="title-icon">list</mat-icon>
+      Expense List
+    </h1>
+    <button
+      mat-raised-button
+      color="primary"
+      routerLink="/add-expense"
+      class="add-button"
+    >
+      <mat-icon>add</mat-icon>
+      Add New Expense
+    </button>
+  </div>
+
+  <!-- Filters and Search -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <!-- Search -->
+        <mat-form-field class="search-field" appearance="outline">
+          <mat-label>Search expenses...</mat-label>
+          <input
+            matInput
+            [(ngModel)]="searchTerm"
+            placeholder="Search by title, category, or description"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Category Filter -->
+        <mat-form-field class="category-filter" appearance="outline">
+          <mat-label>Filter by Category</mat-label>
+          <mat-select [(value)]="selectedCategory">
+            <mat-option value="">All Categories</mat-option>
+            <mat-option
+              *ngFor="let category of getUniqueCategories(expenses)"
+              [value]="category"
+            >
+              {{ category }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Sort Options -->
+        <mat-form-field class="sort-field" appearance="outline">
+          <mat-label>Sort By</mat-label>
+          <mat-select
+            [(value)]="sortBy"
+            (selectionChange)="sortExpenses($event.value)"
+          >
+            <mat-option value="date">Date</mat-option>
+            <mat-option value="amount">Amount</mat-option>
+            <mat-option value="title">Title</mat-option>
+            <mat-option value="category">Category</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Clear Filters -->
+        <button
+          mat-stroked-button
+          (click)="clearFilters()"
+          class="clear-filters-button"
+        >
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Results Summary -->
+  <div class="results-summary">
+    <p class="results-text">
+      Showing {{ getFilteredAndSortedExpenses(expenses).length }} of
+      {{ expenses.length }} expenses
+    </p>
+  </div>
+
+  <!-- Expense Table -->
+  <mat-card class="table-card">
+    <div class="table-container">
+      <table
+        mat-table
+        [dataSource]="getFilteredAndSortedExpenses(expenses)"
+        class="expense-table"
+      >
+        <!-- Title Column -->
+        <ng-container matColumnDef="title">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            (click)="sortExpenses('title')"
+            class="sortable-header"
+          >
+            <div class="header-content">
+              <span>Title</span>
+              <mat-icon *ngIf="sortBy === 'title'" class="sort-icon">
+                {{
+                  sortDirection === "asc" ? "arrow_upward" : "arrow_downward"
+                }}
+              </mat-icon>
+            </div>
+          </th>
+          <td mat-cell *matCellDef="let expense" class="title-cell">
+            <div class="expense-info">
+              <span class="expense-title">{{ expense.title }}</span>
+              <span class="expense-description" *ngIf="expense.description">
+                {{ expense.description }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Category Column -->
+        <ng-container matColumnDef="category">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            (click)="sortExpenses('category')"
+            class="sortable-header"
+          >
+            <div class="header-content">
+              <span>Category</span>
+              <mat-icon *ngIf="sortBy === 'category'" class="sort-icon">
+                {{
+                  sortDirection === "asc" ? "arrow_upward" : "arrow_downward"
+                }}
+              </mat-icon>
+            </div>
+          </th>
+          <td mat-cell *matCellDef="let expense">
+            <span
+              class="category-chip"
+              [style.background-color]="getCategoryColor(expense.category)"
+            >
+              {{ expense.category }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Amount Column -->
+        <ng-container matColumnDef="amount">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            (click)="sortExpenses('amount')"
+            class="sortable-header amount-header"
+          >
+            <div class="header-content">
+              <span>Amount</span>
+              <mat-icon *ngIf="sortBy === 'amount'" class="sort-icon">
+                {{
+                  sortDirection === "asc" ? "arrow_upward" : "arrow_downward"
+                }}
+              </mat-icon>
+            </div>
+          </th>
+          <td mat-cell *matCellDef="let expense" class="amount-cell">
+            {{ formatCurrency(expense.amount) }}
+          </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            (click)="sortExpenses('date')"
+            class="sortable-header"
+          >
+            <div class="header-content">
+              <span>Date</span>
+              <mat-icon *ngIf="sortBy === 'date'" class="sort-icon">
+                {{
+                  sortDirection === "asc" ? "arrow_upward" : "arrow_downward"
+                }}
+              </mat-icon>
+            </div>
+          </th>
+          <td mat-cell *matCellDef="let expense">
+            {{ expense.date | date: "MMM d, y" }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-header">
+            Actions
+          </th>
+          <td mat-cell *matCellDef="let expense" class="actions-cell">
+            <button
+              mat-icon-button
+              (click)="editExpense(expense)"
+              matTooltip="Edit Expense"
+              color="primary"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="deleteExpense(expense)"
+              matTooltip="Delete Expense"
+              color="warn"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  </mat-card>
+
+  <!-- Empty State -->
+  <mat-card
+    *ngIf="getFilteredAndSortedExpenses(expenses).length === 0"
+    class="empty-state"
+  >
+    <mat-card-content>
+      <div class="empty-content">
+        <mat-icon class="empty-icon">receipt_long</mat-icon>
+        <h3 class="empty-title">No expenses found</h3>
+        <p class="empty-message">
+          {{
+            expenses.length === 0
+              ? "You haven't added any expenses yet. Start by adding your first expense!"
+              : "No expenses match your current filters. Try adjusting your search criteria."
+          }}
+        </p>
+        <button
+          mat-raised-button
+          color="primary"
+          routerLink="/add-expense"
+          *ngIf="expenses.length === 0"
+        >
+          <mat-icon>add</mat-icon>
+          Add Your First Expense
+        </button>
+        <button
+          mat-stroked-button
+          (click)="clearFilters()"
+          *ngIf="expenses.length > 0"
+        >
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,254 @@
+<div class="add-expense-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon class="title-icon">{{ isEditMode ? "edit" : "add" }}</mat-icon>
+      {{ pageTitle }}
+    </h1>
+    <button mat-stroked-button routerLink="/expenses" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+      Back to List
+    </button>
+  </div>
+
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>receipt</mat-icon>
+        Expense Details
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{
+          isEditMode
+            ? "Update the expense information below"
+            : "Fill in the details for your new expense"
+        }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form
+        [formGroup]="expenseForm"
+        (ngSubmit)="onSubmit()"
+        class="expense-form"
+      >
+        <!-- Title Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Expense Title *</mat-label>
+          <input
+            matInput
+            formControlName="title"
+            placeholder="e.g., Grocery Shopping, Gas Station"
+            maxlength="100"
+          />
+          <mat-icon matSuffix>title</mat-icon>
+          <mat-hint>Enter a descriptive title for your expense</mat-hint>
+          <mat-error>{{ getFieldError("title") }}</mat-error>
+        </mat-form-field>
+
+        <!-- Amount and Category Row -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="amount-field">
+            <mat-label>Amount *</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="amount"
+              placeholder="0.00"
+              min="0.01"
+              max="999999.99"
+              step="0.01"
+            />
+            <span matPrefix>$&nbsp;</span>
+            <mat-icon matSuffix>attach_money</mat-icon>
+            <mat-error>{{ getFieldError("amount") }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="category-field">
+            <mat-label>Category *</mat-label>
+            <mat-select formControlName="category">
+              <mat-option
+                *ngFor="let category of categories$ | async"
+                [value]="category.name"
+              >
+                <div class="category-option">
+                  <mat-icon [style.color]="category.color">{{
+                    category.icon
+                  }}</mat-icon>
+                  <span>{{ category.name }}</span>
+                </div>
+              </mat-option>
+            </mat-select>
+            <mat-icon matSuffix>category</mat-icon>
+            <mat-error>{{ getFieldError("category") }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Date Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Date *</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            formControlName="date"
+            readonly
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error>{{ getFieldError("date") }}</mat-error>
+        </mat-form-field>
+
+        <!-- Description Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description (Optional)</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            placeholder="Add any additional details about this expense..."
+            rows="3"
+            maxlength="500"
+          ></textarea>
+          <mat-icon matSuffix>description</mat-icon>
+          <mat-hint align="end"
+            >{{
+              expenseForm.get("description")?.value?.length || 0
+            }}/500</mat-hint
+          >
+          <mat-error>{{ getFieldError("description") }}</mat-error>
+        </mat-form-field>
+
+        <!-- Form Summary -->
+        <mat-card
+          class="form-summary"
+          *ngIf="
+            expenseForm.get('title')?.value && expenseForm.get('amount')?.value
+          "
+        >
+          <mat-card-content>
+            <h4 class="summary-title">
+              <mat-icon>preview</mat-icon>
+              Preview
+            </h4>
+            <div class="summary-content">
+              <div class="summary-item">
+                <span class="summary-label">Title:</span>
+                <span class="summary-value">{{
+                  expenseForm.get("title")?.value
+                }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Amount:</span>
+                <span class="summary-value amount">
+                  ${{ expenseForm.get("amount")?.value | number: "1.2-2" }}
+                </span>
+              </div>
+              <div
+                class="summary-item"
+                *ngIf="expenseForm.get('category')?.value"
+              >
+                <span class="summary-label">Category:</span>
+                <span class="summary-value">{{
+                  expenseForm.get("category")?.value
+                }}</span>
+              </div>
+              <div class="summary-item" *ngIf="expenseForm.get('date')?.value">
+                <span class="summary-label">Date:</span>
+                <span class="summary-value">{{
+                  expenseForm.get("date")?.value | date: "MMM d, y"
+                }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions class="form-actions">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="onSubmit()"
+        [disabled]="expenseForm.invalid || isLoading"
+        class="submit-button"
+      >
+        <mat-icon>{{ isEditMode ? "save" : "add" }}</mat-icon>
+        {{ submitButtonText }}
+        <mat-spinner
+          *ngIf="isLoading"
+          diameter="20"
+          class="button-spinner"
+        ></mat-spinner>
+      </button>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="onReset()"
+        [disabled]="isLoading"
+        class="reset-button"
+      >
+        <mat-icon>refresh</mat-icon>
+        Reset
+      </button>
+
+      <button
+        mat-button
+        type="button"
+        (click)="onCancel()"
+        [disabled]="isLoading"
+        class="cancel-button"
+      >
+        <mat-icon>cancel</mat-icon>
+        Cancel
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Form Validation Summary -->
+  <mat-card
+    class="validation-summary"
+    *ngIf="expenseForm.invalid && expenseForm.touched"
+  >
+    <mat-card-content>
+      <h4 class="validation-title">
+        <mat-icon color="warn">error</mat-icon>
+        Please fix the following errors:
+      </h4>
+      <ul class="validation-list">
+        <li
+          *ngIf="
+            expenseForm.get('title')?.invalid &&
+            expenseForm.get('title')?.touched
+          "
+        >
+          {{ getFieldError("title") }}
+        </li>
+        <li
+          *ngIf="
+            expenseForm.get('amount')?.invalid &&
+            expenseForm.get('amount')?.touched
+          "
+        >
+          {{ getFieldError("amount") }}
+        </li>
+        <li
+          *ngIf="
+            expenseForm.get('category')?.invalid &&
+            expenseForm.get('category')?.touched
+          "
+        >
+          {{ getFieldError("category") }}
+        </li>
+        <li
+          *ngIf="
+            expenseForm.get('date')?.invalid && expenseForm.get('date')?.touched
+          "
+        >
+          {{ getFieldError("date") }}
+        </li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+</div>
