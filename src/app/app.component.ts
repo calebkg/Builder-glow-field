@@ -10,7 +10,7 @@ export class AppComponent {
 
   menuItems = [
     { path: "/dashboard", icon: "dashboard", label: "Dashboard" },
-    { path: "/expenses", icon: "list", label: "Expenses" },
+    { path: "/expenses", icon: "list", label: "Expense List" },
     { path: "/add-expense", icon: "add", label: "Add Expense" },
   ];
 }
