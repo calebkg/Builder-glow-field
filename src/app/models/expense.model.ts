@@ -2,9 +2,9 @@ export interface Expense {
   id?: number;
   title: string;
   amount: number;
-  category: string;
+  categoryId: number;
   description?: string;
-  date: Date;
+  expenseDate: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }

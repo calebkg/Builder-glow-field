@@ -4,7 +4,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
 import { ExpenseService } from "../../services/expense.service";
-import { Expense } from "../../models/expense.model";
+import { Expense, ExpenseCategory } from "../../models/expense.model";
 
 @Component({
   selector: "app-expense-list",
@@ -13,6 +13,7 @@ import { Expense } from "../../models/expense.model";
 })
 export class ExpenseListComponent implements OnInit {
   expenses$!: Observable<Expense[]>;
+  categories: ExpenseCategory[] = [];
   displayedColumns: string[] = [
     "title",
     "category",
@@ -34,12 +35,15 @@ export class ExpenseListComponent implements OnInit {
 
   ngOnInit(): void {
     this.expenses$ = this.expenseService.getExpenses();
+    this.expenseService.getCategories().subscribe(categories => {
+      this.categories = categories;
+    });
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-KE", {
       style: "currency",
-      currency: "USD",
+      currency: "KES",
     }).format(amount);
   }
 
@@ -60,6 +64,11 @@ export class ExpenseListComponent implements OnInit {
 
   applyFilter(filterValue: string): void {
     this.searchTerm = filterValue.trim().toLowerCase();
+  }
+
+  getCategoryName(categoryId: number): string {
+    const category = this.categories.find(cat => cat.id === categoryId);
+    return category ? category.name : '';
   }
 
   filterByCategory(category: string): void {
@@ -97,7 +106,7 @@ export class ExpenseListComponent implements OnInit {
       filtered = filtered.filter(
         (expense) =>
           expense.title.toLowerCase().includes(this.searchTerm) ||
-          expense.category.toLowerCase().includes(this.searchTerm) ||
+          this.getCategoryName(expense.categoryId).toLowerCase().includes(this.searchTerm) ||
           (expense.description &&
             expense.description.toLowerCase().includes(this.searchTerm)),
       );
@@ -106,7 +115,7 @@ export class ExpenseListComponent implements OnInit {
     // Apply category filter
     if (this.selectedCategory) {
       filtered = filtered.filter(
-        (expense) => expense.category === this.selectedCategory,
+        (expense) => this.getCategoryName(expense.categoryId) === this.selectedCategory,
       );
     }
 
@@ -124,13 +133,13 @@ export class ExpenseListComponent implements OnInit {
           valueB = b.amount;
           break;
         case "category":
-          valueA = a.category.toLowerCase();
-          valueB = b.category.toLowerCase();
+          valueA = this.getCategoryName(a.categoryId).toLowerCase();
+          valueB = this.getCategoryName(b.categoryId).toLowerCase();
           break;
         case "date":
         default:
-          valueA = new Date(a.date).getTime();
-          valueB = new Date(b.date).getTime();
+          valueA = new Date(a.expenseDate).getTime();
+          valueB = new Date(b.expenseDate).getTime();
           break;
       }
 
@@ -147,7 +156,7 @@ export class ExpenseListComponent implements OnInit {
   }
 
   getUniqueCategories(expenses: Expense[]): string[] {
-    return [...new Set(expenses.map((expense) => expense.category))].sort();
+    return [...new Set(expenses.map((expense) => this.getCategoryName(expense.categoryId)))].sort();
   }
 
   clearFilters(): void {

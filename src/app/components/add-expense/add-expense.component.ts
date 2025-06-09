@@ -14,6 +14,7 @@ import { Expense, ExpenseCategory } from "../../models/expense.model";
 export class AddExpenseComponent implements OnInit {
   expenseForm!: FormGroup;
   categories$!: Observable<ExpenseCategory[]>;
+  categories: ExpenseCategory[] = [];
   isEditMode = false;
   expenseId?: number;
   isLoading = false;
@@ -29,6 +30,9 @@ export class AddExpenseComponent implements OnInit {
   ngOnInit(): void {
     this.initializeForm();
     this.categories$ = this.expenseService.getCategories();
+    this.categories$.subscribe(categories => {
+      this.categories = categories;
+    });
 
     // Check if we're in edit mode
     this.route.paramMap.subscribe((params) => {
@@ -55,9 +59,9 @@ export class AddExpenseComponent implements OnInit {
         "",
         [Validators.required, Validators.min(0.01), Validators.max(999999.99)],
       ],
-      category: ["", Validators.required],
+      categoryId: ["", Validators.required],
       description: ["", Validators.maxLength(500)],
-      date: [new Date(), Validators.required],
+      expenseDate: [new Date(), Validators.required],
     });
   }
 
@@ -69,9 +73,9 @@ export class AddExpenseComponent implements OnInit {
           this.expenseForm.patchValue({
             title: expense.title,
             amount: expense.amount,
-            category: expense.category,
+            categoryId: expense.categoryId,
             description: expense.description || "",
-            date: new Date(expense.date),
+            expenseDate: new Date(expense.expenseDate),
           });
         } else {
           this.showError("Expense not found");
@@ -91,19 +95,19 @@ export class AddExpenseComponent implements OnInit {
       this.isLoading = true;
       const formValue = this.expenseForm.value;
 
-      const expense: Expense = {
+      const expense = {
         title: formValue.title.trim(),
         amount: +formValue.amount,
-        category: formValue.category,
+        categoryId: +formValue.categoryId,
         description: formValue.description?.trim() || undefined,
-        date: new Date(formValue.date),
+        expenseDate: formValue.expenseDate,
       };
 
       if (this.isEditMode && this.expenseId) {
-        expense.id = this.expenseId;
-        this.updateExpense(expense);
+        (expense as any).id = this.expenseId;
+        this.updateExpense(expense as any);
       } else {
-        this.addExpense(expense);
+        this.addExpense(expense as any);
       }
     } else {
       this.markFormGroupTouched();
@@ -176,9 +180,9 @@ export class AddExpenseComponent implements OnInit {
     const displayNames: { [key: string]: string } = {
       title: "Title",
       amount: "Amount",
-      category: "Category",
+      categoryId: "Category",
       description: "Description",
-      date: "Date",
+      expenseDate: "Date",
     };
     return displayNames[fieldName] || fieldName;
   }
@@ -210,5 +214,10 @@ export class AddExpenseComponent implements OnInit {
 
   get submitButtonText(): string {
     return this.isEditMode ? "Update Expense" : "Add Expense";
+  }
+
+  getCategoryName(categoryId: number): string {
+    const category = this.categories.find(cat => cat.id === categoryId);
+    return category ? category.name : '';
   }
 }

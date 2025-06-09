@@ -1,0 +1,50 @@
+<div class="auth-bg">
+  <div class="auth-center">
+    <mat-card class="auth-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="auth-icon">login</mat-icon>
+          <span>Sign In</span>
+        </mat-card-title>
+        <mat-card-subtitle>Welcome back! Please login to your account.</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="Enter your email">
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+              Please enter a valid email address
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input matInput formControlName="password" type="password" placeholder="Enter your password">
+            <mat-icon matSuffix>lock</mat-icon>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+              Password is required
+            </mat-error>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
+              Password must be at least 6 characters
+            </mat-error>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid || isLoading" class="auth-btn">
+            <mat-icon>login</mat-icon>
+            Login
+            <mat-spinner *ngIf="isLoading" diameter="20" class="button-spinner"></mat-spinner>
+          </button>
+        </form>
+      </mat-card-content>
+      <mat-card-actions class="auth-actions">
+        <span>Don't have an account?</span>
+        <a routerLink="/register" class="auth-link">Register here</a>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div> 

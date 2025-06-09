@@ -1,6 +1,7 @@
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { ReactiveFormsModule, FormsModule } from "@angular/forms";
 
 // Angular Material Modules
@@ -33,6 +34,9 @@ import { AppComponent } from "./app.component";
 import { DashboardComponent } from "./components/dashboard/dashboard.component";
 import { ExpenseListComponent } from "./components/expense-list/expense-list.component";
 import { AddExpenseComponent } from "./components/add-expense/add-expense.component";
+import { LoginComponent } from "./components/auth/login/login.component";
+import { RegisterComponent } from "./components/auth/register/register.component";
+import { AuthInterceptor } from './services/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -40,10 +44,13 @@ import { AddExpenseComponent } from "./components/add-expense/add-expense.compon
     DashboardComponent,
     ExpenseListComponent,
     AddExpenseComponent,
+    LoginComponent,
+    RegisterComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    HttpClientModule,
     ReactiveFormsModule,
     FormsModule,
     AppRoutingModule,
@@ -72,7 +79,9 @@ import { AddExpenseComponent } from "./components/add-expense/add-expense.compon
     MatMenuModule,
     MatTabsModule,
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

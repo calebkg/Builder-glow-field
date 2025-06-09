@@ -132,10 +132,8 @@
               </div>
               <div class="transaction-details">
                 <span class="transaction-title">{{ expense.title }}</span>
-                <span class="transaction-category">{{ expense.category }}</span>
-                <span class="transaction-date">{{
-                  expense.date | date: "MMM d, y"
-                }}</span>
+                <span class="transaction-category">{{ getCategoryName(expense.categoryId) }}</span>
+                <span class="transaction-date">{{ expense.expenseDate | date: "MMM d, y" }}</span>
               </div>
             </div>
             <div class="transaction-amount">

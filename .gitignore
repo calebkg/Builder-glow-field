@@ -42,3 +42,23 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Node
+node_modules/
+dist/
+# Angular build
+out-tsc/
+# Environment
+src/environments/environment*.ts
+
+# VS/IDE
+.vs/
+*.user
+*.suo
+
+# .NET
+bin/
+obj/
+*.db
+*.sqlite
+*.log

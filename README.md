@@ -1,6 +1,6 @@
-# Expense Manager - Angular Application
+# Expense Manager - Angular + ASP.NET Core + MySQL
 
-A modern, responsive expense management system built with Angular 17 and Angular Material.
+A modern, responsive expense management system built with Angular 17 (frontend) and ASP.NET Core Web API (backend) with MySQL database and JWT authentication.
 
 ## Features
 
@@ -10,153 +10,105 @@ A modern, responsive expense management system built with Angular 17 and Angular
 - **Filtering & Sorting**: Search and filter expenses by various criteria
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Material Design**: Clean, modern UI following Material Design principles
+- **User Authentication**: Secure registration, login, and JWT-based session management
+- **User-specific Data**: Each user only sees their own expenses
 
 ## Technology Stack
 
-- **Frontend**: Angular 17
-- **UI Library**: Angular Material
-- **Styling**: CSS with Material Design theming
-- **Charts**: Chart.js with ng2-charts
-- **Forms**: Reactive Forms with validation
-- **Routing**: Angular Router
-- **Testing**: Jasmine + Karma
+- **Frontend**: Angular 17, Angular Material
+- **Backend**: ASP.NET Core Web API (.NET 8)
+- **Database**: MySQL
+- **Authentication**: JWT (JSON Web Token)
 
 ## Prerequisites
 
+### Frontend
 - Node.js (v18 or higher)
 - npm (v9 or higher)
 - Angular CLI (v17 or higher)
 
-## Installation
+### Backend
+- .NET 8 SDK
+- MySQL Server
 
-1. Clone the repository:
+## Backend Setup (ASP.NET Core + MySQL)
 
+1. **Clone the repository and navigate to the backend folder:**
    ```bash
-   git clone <repository-url>
-   cd expense-manager-angular
+   cd backend/ExpenseManager.API
    ```
+2. **Configure your database connection:**
+   - Edit `appsettings.Development.json` and set your MySQL connection string:
+     ```json
+     "ConnectionStrings": {
+       "DefaultConnection": "server=localhost;database=expense_manager;user=YOUR_USER;password=YOUR_PASSWORD;"
+     }
+     ```
+3. **Apply database migrations:**
+   ```bash
+   dotnet ef database update
+   ```
+4. **Run the backend API:**
+   ```bash
+   dotnet run
+   ```
+   The API will be available at `http://localhost:5257` (or your configured port).
 
-2. Install dependencies:
+## Frontend Setup (Angular)
 
+1. **Navigate to the frontend folder:**
+   ```bash
+   cd src
+   ```
+2. **Install dependencies:**
    ```bash
    npm install
    ```
-
-3. Install Angular CLI globally (if not already installed):
+3. **Set the API URL:**
+   - Edit `src/environments/environment.ts` and set:
+     ```typescript
+     export const environment = {
+       production: false,
+       apiUrl: 'http://localhost:5257/api'
+     };
+     ```
+4. **Run the Angular app:**
    ```bash
-   npm install -g @angular/cli
+   ng serve
    ```
+   The app will be available at `http://localhost:4200`.
 
-## Development
+## Authentication (JWT)
+- Register and login with your email and password.
+- The frontend stores the JWT token and sends it with every API request.
+- All expense data is user-specific and protected.
 
-Start the development server:
-
-```bash
-npm start
-# or
-ng serve
-```
-
-Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
-
-## Build
-
-Build the project for production:
-
-```bash
-npm run build
-# or
-ng build
-```
-
-The build artifacts will be stored in the `dist/` directory.
-
-## Testing
-
-Run unit tests:
-
-```bash
-npm test
-# or
-ng test
-```
+## Quick Start (Full Stack)
+1. Start MySQL and ensure your database is ready.
+2. Start the backend API (`dotnet run`).
+3. Start the Angular frontend (`ng serve`).
+4. Open [http://localhost:4200](http://localhost:4200) in your browser.
+5. Register a new user, log in, and start managing your expenses!
 
 ## Project Structure
 
 ```
-src/
-├── app/
-│   ├── components/           # Feature components
-│   │   ├── dashboard/        # Dashboard component
-│   │   ├── expense-list/     # Expense list component
-│   │   └── add-expense/      # Add/Edit expense component
-│   ├── models/               # TypeScript interfaces/models
-│   ├── services/             # Angular services
-│   ├── app.component.*       # Root component
-│   ├── app.module.ts         # Root module
-│   └── app-routing.module.ts # Routing configuration
-├── assets/                   # Static assets
-├── environments/             # Environment configurations
-└── styles.css               # Global styles
+root/
+├── backend/ExpenseManager.API/   # ASP.NET Core Web API backend
+├── src/                         # Angular frontend
+│   ├── app/
+│   ├── assets/
+│   └── environments/
+└── README.md
 ```
 
-## Key Components
-
-### Dashboard
-
-- Expense statistics and overview
-- Recent transactions
-- Category breakdown
-- Quick action buttons
-
-### Expense List
-
-- Comprehensive expense table
-- Search and filtering capabilities
-- Sorting options
-- Edit/Delete actions
-
-### Add/Edit Expense
-
-- Reactive form with validation
-- Category selection with icons
-- Date picker integration
-- Real-time form preview
-
-## Services
-
-### ExpenseService
-
-- Manages expense CRUD operations
-- Provides expense statistics
-- Handles category management
-- Uses RxJS observables for reactive data flow
-
-## Backend Integration
-
-The application is designed to work with a RESTful API. To integrate with your C# backend:
-
-1. Update the `apiUrl` in `src/environments/environment.ts`
-2. Modify the `ExpenseService` to make HTTP calls instead of using mock data
-3. Add authentication if required
-4. Handle error responses appropriately
-
-Example API endpoints expected:
-
-- `GET /api/expenses` - Get all expenses
-- `POST /api/expenses` - Create new expense
-- `PUT /api/expenses/:id` - Update expense
-- `DELETE /api/expenses/:id` - Delete expense
-- `GET /api/categories` - Get categories
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/new-feature`
-3. Commit your changes: `git commit -am 'Add new feature'`
-4. Push to the branch: `git push origin feature/new-feature`
-5. Submit a pull request
+## API Endpoints (Backend)
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login and receive JWT token
+- `GET /api/expenses` - Get all expenses for the logged-in user
+- `POST /api/expenses` - Add a new expense
+- `GET /api/expenses/stats` - Get expense statistics
+- `GET /api/categories` - Get all categories
 
 ## License
-
 This project is licensed under the MIT License.
