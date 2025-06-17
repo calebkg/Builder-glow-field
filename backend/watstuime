@@ -1,0 +1,90 @@
+using System;
+
+class ATM
+{
+    private decimal balance;
+
+    public ATM(decimal initialBalance)
+    {
+        balance = initialBalance;
+    }
+
+    public void ShowMenu()
+    {
+        while (true)
+        {
+            Console.WriteLine("\n--- ATM Menu ---");
+            Console.WriteLine("1. Check Balance");
+            Console.WriteLine("2. Deposit");
+            Console.WriteLine("3. Withdraw");
+            Console.WriteLine("4. Exit");
+            Console.Write("Select an option: ");
+            string input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "1":
+                    CheckBalance();
+                    break;
+                case "2":
+                    Deposit();
+                    break;
+                case "3":
+                    Withdraw();
+                    break;
+                case "4":
+                    Console.WriteLine("Thank you for using the ATM.");
+                    return;
+                default:
+                    Console.WriteLine("Invalid option. Try again.");
+                    break;
+            }
+        }
+    }
+
+    private void CheckBalance()
+    {
+        Console.WriteLine($"Your current balance is: ${balance:F2}");
+    }
+
+    private void Deposit()
+    {
+        Console.Write("Enter amount to deposit: ");
+        if (decimal.TryParse(Console.ReadLine(), out decimal amount) && amount > 0)
+        {
+            balance += amount;
+            Console.WriteLine($"Deposited ${amount:F2}. New balance: ${balance:F2}");
+        }
+        else
+        {
+            Console.WriteLine("Invalid amount.");
+        }
+    }
+
+    private void Withdraw()
+    {
+        Console.Write("Enter amount to withdraw: ");
+        if (decimal.TryParse(Console.ReadLine(), out decimal amount) && amount > 0)
+        {
+            if (amount <= balance)
+            {
+                balance -= amount;
+                Console.WriteLine($"Withdrew ${amount:F2}. New balance: ${balance:F2}");
+            }
+            else
+            {
+                Console.WriteLine("Insufficient funds.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Invalid amount.");
+        }
+    }
+
+    static void Main()
+    {
+        ATM atm = new ATM(1000.00m); // Initial balance
+        atm.ShowMenu();
+    }
+}

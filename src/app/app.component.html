@@ -40,12 +40,18 @@
       <span class="toolbar-spacer"></span>
       <span class="app-title">Expense Management System</span>
       <span class="toolbar-spacer"></span>
+      <div class="user-avatar" *ngIf="authService.getCurrentUser() as user">
+        <span class="avatar-circle">{{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}</span>
+      </div>
       <button mat-icon-button class="notification-button">
         <mat-icon>notifications</mat-icon>
       </button>
     </mat-toolbar>
 
     <div class="content-container">
+      <div *ngIf="authService.getCurrentUser() as user" class="welcome-message">
+        Welcome, <b>{{ user.firstName }} {{ user.lastName }}</b>!
+      </div>
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>
